@@ -13,7 +13,7 @@ $ConvertTable = Import-Csv Conversiontable.csv | Sort-Object -Property 'guid' -U
 # MSA Org Units
 #$MSA = Get-Content msa
 $MSATable = Get-CIPPTable -TableName 'msaOrgUnits'
-$MSAOUs = Get-AzDataTableEntity @MSATable | Select-Object 'OU'
+$MSAOUs = (Get-AzDataTableEntity @MSATable | Select-Object 'OU').OU
 
 Set-Location (Get-Item $PSScriptRoot).Parent.FullName
 # Interact with query parameters or the body of the request.
