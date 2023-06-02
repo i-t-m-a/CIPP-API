@@ -78,7 +78,7 @@ if ($userid -and $Request.query.IncludeLogonDetails) {
     @{ Name = 'LastSigninFailureReason'; Expression = { if ($LastSignIn.Id -eq 0) { 'Sucessfully signed in' } else { $LastSignIn.Id } } }
 }
 # Associate values to output bindings by calling 'Push-OutputBinding'.
-$GraphRequest = $GraphRequest | Where-Object { ( ($_.onPremisesDistinguishedName -replace '^CN=.+?(?<!\\),') -and $_.Enabled -eq $true ) -in $MSA}
+$GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } | Where-Object { ($_.onPremisesDistinguishedName -replace '^CN=.+?(?<!\\),') -in $MSA}
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
         Body       = @($GraphRequest)
