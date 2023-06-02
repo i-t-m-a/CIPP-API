@@ -9,7 +9,12 @@ $selectlist = 'id', 'accountEnabled', 'businessPhones', 'city', 'createdDateTime
 # Write to the Azure Functions log stream.
 Write-Host 'PowerShell HTTP trigger function processed a request.'
 $ConvertTable = Import-Csv Conversiontable.csv | Sort-Object -Property 'guid' -Unique
-$MSA = Get-Content msa
+
+# MSA Org Units
+#$MSA = Get-Content msa
+$MSATable = Get-CIPPTable -TableName 'msaOrgUnits'
+$MSAOUs = (Get-AzDataTableEntity @Table).ou
+
 Set-Location (Get-Item $PSScriptRoot).Parent.FullName
 # Interact with query parameters or the body of the request.
 $TenantFilter = $Request.Query.TenantFilter
@@ -78,7 +83,7 @@ if ($userid -and $Request.query.IncludeLogonDetails) {
     @{ Name = 'LastSigninFailureReason'; Expression = { if ($LastSignIn.Id -eq 0) { 'Sucessfully signed in' } else { $LastSignIn.Id } } }
 }
 # Associate values to output bindings by calling 'Push-OutputBinding'.
-$GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } | Where-Object { ($_.onPremisesDistinguishedName -replace '^CN=.+?(?<!\\),') -in $MSA}
+$GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } | Where-Object { ($_.onPremisesDistinguishedName -replace '^CN=.+?(?<!\\),') -in $MSAOUs}
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
         Body       = @($GraphRequest)
