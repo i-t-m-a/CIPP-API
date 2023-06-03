@@ -87,7 +87,7 @@ if ($userid -and $Request.query.IncludeLogonDetails) {
 $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } 
 $GraphRequest = $GraphRequest | 
 Where-Object { 
-    $OU = $_.DistinguishedName -replace '^.+?(?<!\\),',''
+    $OU = $_.onPremisesDistinguishedName -replace '^.+?(?<!\\),',''
     $indx = $OU.Split(',').IndexOf('OU=Users')
     $OU.Replace( "$([string]$OU.Split(',')[$indx-1]),",'') -in $MSAOUs
 }
