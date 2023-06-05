@@ -19,7 +19,7 @@ $userid = $Request.Query.UserID
 # MSA Org Units
 #$MSA = Get-Content msa
 $MSATable = Get-CIPPTable -TableName 'msaOrgUnits'
-$MSAOUs = (Get-AzDataTableEntity @MSATable | Select-Object 'OU','Tenant','TenantId') | Where-Object {$_.TenantId -eq $TenantFilter}
+$MSAOUs = (Get-AzDataTableEntity @MSATable | Select-Object 'OU','Tenant','TenantId') | Where-Object {$_.Tenant -eq $TenantFilter}
 
 
 $GraphRequest = if ($TenantFilter -ne 'AllTenants') {
