@@ -10,16 +10,17 @@ $selectlist = 'id', 'accountEnabled', 'businessPhones', 'city', 'createdDateTime
 Write-Host 'PowerShell HTTP trigger function processed a request.'
 $ConvertTable = Import-Csv Conversiontable.csv | Sort-Object -Property 'guid' -Unique
 
-# MSA Org Units
-#$MSA = Get-Content msa
-$MSATable = Get-CIPPTable -TableName 'msaOrgUnits'
-$MSAOUs = (Get-AzDataTableEntity @MSATable | Select-Object 'OU','Tenant')
-
 Set-Location (Get-Item $PSScriptRoot).Parent.FullName
 # Interact with query parameters or the body of the request.
 $TenantFilter = $Request.Query.TenantFilter
 $GraphFilter = $Request.Query.graphFilter
 $userid = $Request.Query.UserID
+
+# MSA Org Units
+#$MSA = Get-Content msa
+$MSATable = Get-CIPPTable -TableName 'msaOrgUnits'
+$MSAOUs = (Get-AzDataTableEntity @MSATable | Select-Object 'OU','Tenant','TenantId') | Where-Object {$_.TenantId -eq $TenantFilter}
+
 
 $GraphRequest = if ($TenantFilter -ne 'AllTenants') {
     New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users/$($userid)?`$top=999&`$select=$($selectlist -join ',')&`$filter=$GraphFilter&`$count=true" -tenantid $TenantFilter -ComplexFilter | Select-Object $selectlist | ForEach-Object {
