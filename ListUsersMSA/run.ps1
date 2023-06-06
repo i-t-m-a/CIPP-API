@@ -86,14 +86,28 @@ if ($userid -and $Request.query.IncludeLogonDetails) {
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 #$GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } | Where-Object { ($_.onPremisesDistinguishedName -replace '^CN=.+?(?<!\\),') -in $MSAOUs}
 $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } 
-$GraphRequest = $GraphRequest | 
-Where-Object { 
-    $OU = $_.onPremisesDistinguishedName -replace '^.+?(?<!\\),',''
-    $indx = $OU.Split(',').IndexOf('OU=Users')
-    $OU.Replace( "$([string]$OU.Split(',')[$indx-1]),",'') -in $MSAOUs.OU
+#$GraphRequest = $GraphRequest | 
+#Where-Object { 
+#    $OU = $_.onPremisesDistinguishedName -replace '^.+?(?<!\\),',''
+#    $indx = $OU.Split(',').IndexOf('OU=Users')
+#    $OU.Replace( "$([string]$OU.Split(',')[$indx-1]),",'') -in $MSAOUs.OU
+#}
+
+$result = @()
+foreach ($user in $GraphRequest)
+{
+    $DN = $user.DistinguishedName -replace '^.+?(?<!\\),',''
+    $match = 0
+    foreach ($o in $rootOU)
+    {
+        $indx = $DN.Split(',').IndexOf($o)
+        if ($indx -gt 0) { $match = 1 }      
+    }
+
+    if ($match) { $result += $user }
 }
 
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
-        Body       = @($GraphRequest)
+        Body       = @($result)
     })
