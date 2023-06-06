@@ -106,8 +106,9 @@ foreach ($user in $GraphRequest)
 
     if ($match) { $result += $user }
 }
+$GraphRequest = $result
 
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
-        Body       = @($result)
+        Body       = @($GraphRequest)
     })
