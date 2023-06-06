@@ -97,10 +97,9 @@ $result = @()
 foreach ($user in $GraphRequest)
 {
     $match = 0
-    foreach ($o in $msausers)
+    foreach ($o in $MSAOUs)
     {
-        if ($user.onPremisesDistinguishedName -like "*$o*")
-        { $match = 1 }
+        if ($user.onPremisesDistinguishedName -like "*$o*") { $match = 1 }
     }
 
     if ($match) { $result += $user }
