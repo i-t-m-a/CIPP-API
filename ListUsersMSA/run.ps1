@@ -99,7 +99,7 @@ foreach ($user in $GraphRequest)
     $match = 0
     foreach ($o in $msausers)
     {
-        if ($user.DistinguishedName -like "*$o*")
+        if ($user.onPremisesDistinguishedName -like "*$o*")
         { $match = 1 }
     }
 
