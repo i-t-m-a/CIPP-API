@@ -94,7 +94,7 @@ $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) }
 #}
 
 $result = @()
-foreach ($user in $users)
+foreach ($user in $GraphRequest)
 {
     $match = 0
     foreach ($o in $msausers)
