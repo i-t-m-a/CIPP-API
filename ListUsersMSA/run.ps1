@@ -94,14 +94,13 @@ $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) }
 #}
 
 $result = @()
-foreach ($user in $GraphRequest)
+foreach ($user in $users)
 {
-    $DN = $user.onPremisesDistinguishedName -replace '^.+?(?<!\\),',''
     $match = 0
-    foreach ($o in $MSAOUs)
+    foreach ($o in $msausers)
     {
-        $indx = $DN.Split(',').IndexOf($o)
-        if ($indx -gt 0) { $match = 1 }      
+        if ($user.DistinguishedName -like "*$o*")
+        { $match = 1 }
     }
 
     if ($match) { $result += $user }
