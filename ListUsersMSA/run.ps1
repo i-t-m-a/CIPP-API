@@ -96,7 +96,7 @@ $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) }
 $result = @()
 foreach ($user in $GraphRequest)
 {
-    $DN = $user.DistinguishedName -replace '^.+?(?<!\\),',''
+    $DN = $user.onPremisesDistinguishedName -replace '^.+?(?<!\\),',''
     $match = 0
     foreach ($o in $rootOU)
     {
