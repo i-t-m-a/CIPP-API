@@ -98,7 +98,7 @@ foreach ($user in $GraphRequest)
 {
     $DN = $user.onPremisesDistinguishedName -replace '^.+?(?<!\\),',''
     $match = 0
-    foreach ($o in $rootOU)
+    foreach ($o in $MSAOUs)
     {
         $indx = $DN.Split(',').IndexOf($o)
         if ($indx -gt 0) { $match = 1 }      
