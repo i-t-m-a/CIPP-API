@@ -87,7 +87,7 @@ if ($userid -and $Request.query.IncludeLogonDetails) {
 }
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } 
-$GraphRequest = $GraphRequest | Where-Object { ( ($_.userPrincipalName).Split('@')[1] -in $MSAOUs.UPNSuffix ) -or ( ($_.userPrincipalName).Split('@')[1] -in $MSAOUs.Tenant ) } 
+$GraphRequest = $GraphRequest | Where-Object { ( ($_.primDomain) -in $MSAOUs.UPNSuffix ) } 
 #$GraphRequest = $GraphRequest | 
 #Where-Object { 
 #    $OU = $_.onPremisesDistinguishedName -replace '^.+?(?<!\\),',''
