@@ -106,7 +106,7 @@ Where-Object {
         $indx = $OU.Split(',').IndexOf($ouToMatch)
         if ($indx -gt 0)
         {
-            $OU.Replace( "$([string]$OU.Split(',')[$indx-1]),",'') -in $MSAOUs
+            $OU.Replace( "$([string]$OU.Split(',')[$indx-1]),",'') -in $MSAOUs.OU
         }
     }
 }
