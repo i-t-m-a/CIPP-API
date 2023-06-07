@@ -102,7 +102,7 @@ Where-Object {
     foreach ($o in $MSAOUs.OU)
     {
         $ouToMatch = $o.Split(',')[0]
-        $OU = $_.DistinguishedName -replace '^.+?(?<!\\),',''
+        $OU = $_.onPremisesDistinguishedName -replace '^.+?(?<!\\),',''
         $indx = $OU.Split(',').IndexOf($ouToMatch)
         if ($indx -gt 0)
         {
