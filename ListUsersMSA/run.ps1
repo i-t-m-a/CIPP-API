@@ -83,10 +83,13 @@ $MSATable = Get-CIPPTable -TableName 'msaOrgUnits'
 $MSAOUs = (Get-AzDataTableEntity @MSATable | Select-Object 'OU','Tenant','TenantId','UPNSuffix') 
 if ($TenantFilter -ne 'AllTenants') { $MSAOUs = $MSAOUs | Where-Object {$_.Tenant -eq $TenantFilter} }
 
+$MSAExcludedTable = Get-CIPPTable -TableName 'msaOrgUnits'
+$MSAExclusions = (Get-AzDataTableEntity @MSAExcludedTable | Select-Object 'mail','displayName') 
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } 
 $GraphRequest = $GraphRequest | Where-Object { ( ($_.userPrincipalName -split '@' | Select-Object -Last 1) -in ($MSAOUs.UPNSuffix) ) } 
+$GraphRequest = $GraphRequest | Where-Object { ( $_.displayName -notin ($MSAExclusions.displayName) ) }  
 
 $GraphRequest = $GraphRequest | 
 Where-Object { 
