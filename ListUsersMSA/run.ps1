@@ -88,9 +88,7 @@ $MSAExclusions = (Get-AzDataTableEntity @MSAExcludedTable | Select-Object 'mail'
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } 
-#$GraphRequest = $GraphRequest | Where-Object { ( $_.primDomain -in $MSAOUs.UPNSuffix) } 
 $GraphRequest = $GraphRequest | Where-Object { ( $_.mail -notin ($MSAExclusions.mail) ) }  
-#$GraphRequest = $GraphRequest | Where-Object { ( $_.LicJoined -ne $null ) } 
 $GraphRequest = $GraphRequest | Where-Object { ( $_.userPrincipalName -notlike "*#EXT#*" ) } 
 
 $GraphRequest = $GraphRequest | 
@@ -111,6 +109,9 @@ Where-Object {
         }
     }
 }
+
+$MSAUserCache = Get-CIPPTable -TableName 'msaUserCache'
+Update-AzDataTableEntity @TenantsTable -Entity $GraphRequest
 
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
