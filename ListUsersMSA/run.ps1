@@ -89,11 +89,26 @@ if ($userid -and $Request.query.IncludeLogonDetails) {
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 #$GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } | Where-Object { ($_.onPremisesDistinguishedName -replace '^CN=.+?(?<!\\),') -in $MSAOUs}
 $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } 
+#$GraphRequest = $GraphRequest | 
+#Where-Object { 
+#    $OU = $_.onPremisesDistinguishedName -replace '^.+?(?<!\\),',''
+#    $indx = $OU.Split(',').IndexOf('OU=Users')
+#    $OU.Replace( "$([string]$OU.Split(',')[$indx-1]),",'') -in $MSAOUs.OU
+#}
+
 $GraphRequest = $GraphRequest | 
 Where-Object { 
-    $OU = $_.onPremisesDistinguishedName -replace '^.+?(?<!\\),',''
-    $indx = $OU.Split(',').IndexOf('OU=Users')
-    $OU.Replace( "$([string]$OU.Split(',')[$indx-1]),",'') -in $MSAOUs.OU
+
+    foreach ($o in $MSAOUs.OU)
+    {
+        $ouToMatch = $o.Split(',')[0]
+        $OU = $_.DistinguishedName -replace '^.+?(?<!\\),',''
+        $indx = $OU.Split(',').IndexOf($ouToMatch)
+        if ($indx -gt 0)
+        {
+            $OU.Replace( "$([string]$OU.Split(',')[$indx-1]),",'') -in $MSAOUs
+        }
+    }
 }
 
 #$GraphRequest = foreach ($user in $GraphRequest)
