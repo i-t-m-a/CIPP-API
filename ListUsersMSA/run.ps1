@@ -90,6 +90,7 @@ $MSAExclusions = (Get-AzDataTableEntity @MSAExcludedTable | Select-Object 'mail'
 $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } 
 $GraphRequest = $GraphRequest | Where-Object { ( $_.primDomain -in $MSAOUs.UPNSuffix) } 
 $GraphRequest = $GraphRequest | Where-Object { ( $_.mail -notin ($MSAExclusions.mail) ) }  
+$GraphRequest = $GraphRequest | Where-Object { ( $_.LicJoined -ne $null ) } 
 
 $GraphRequest = $GraphRequest | 
 Where-Object { 
