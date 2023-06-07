@@ -89,7 +89,7 @@ $MSAExclusions = (Get-AzDataTableEntity @MSAExcludedTable | Select-Object 'mail'
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } 
 $GraphRequest = $GraphRequest | Where-Object { ( ($_.userPrincipalName -split '@' | Select-Object -Last 1) -in ($MSAOUs.UPNSuffix) ) } 
-$GraphRequest = $GraphRequest | Where-Object { ( $_.displayName -notin ($MSAExclusions.displayName) ) }  
+$GraphRequest = $GraphRequest | Where-Object { ( $_.mail -notin ($MSAExclusions.mail) ) }  
 
 $GraphRequest = $GraphRequest | 
 Where-Object { 
