@@ -110,9 +110,9 @@ Where-Object {
     }
 }
 
-$MSAUserCache = Get-CIPPTable -TableName 'msaUserCache'
-$MSAUserCache += ($GraphRequest | Select-Object 'LicJoined','displayName','mail')
-Update-AzDataTableEntity @TenantsTable -Entity $GraphRequest
+#$MSAUserCache = Get-CIPPTable -TableName 'msaUserCache'
+#$MSAUserCache += ($GraphRequest | Select-Object 'LicJoined','displayName','mail')
+#Update-AzDataTableEntity @TenantsTable -Entity $GraphRequest
 
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
