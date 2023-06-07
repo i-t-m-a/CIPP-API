@@ -16,15 +16,6 @@ $TenantFilter = $Request.Query.TenantFilter
 $GraphFilter = $Request.Query.graphFilter
 $userid = $Request.Query.UserID
 
-# MSA Org Units
-#$MSA = Get-Content msa
-$MSATable = Get-CIPPTable -TableName 'msaOrgUnits'
-$MSAOUs = (Get-AzDataTableEntity @MSATable | Select-Object 'OU','Tenant','TenantId','UPNSuffix') 
-if ($TenantFilter -ne 'AllTenants')
-{ $MSAOUs = $MSAOUs | Where-Object {$_.Tenant -eq $TenantFilter} }
-
-
-
 $GraphRequest = if ($TenantFilter -ne 'AllTenants') {
     New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users/$($userid)?`$top=999&`$select=$($selectlist -join ',')&`$filter=$GraphFilter&`$count=true" -tenantid $TenantFilter -ComplexFilter | Select-Object $selectlist | ForEach-Object {
         $_.onPremisesSyncEnabled = [bool]($_.onPremisesSyncEnabled)
@@ -85,15 +76,17 @@ if ($userid -and $Request.query.IncludeLogonDetails) {
     @{ Name = 'LastSigninResult'; Expression = { $LastSignIn.status } }, 
     @{ Name = 'LastSigninFailureReason'; Expression = { if ($LastSignIn.Id -eq 0) { 'Sucessfully signed in' } else { $LastSignIn.Id } } }
 }
+
+# MSA Org Units
+#$MSA = Get-Content msa
+$MSATable = Get-CIPPTable -TableName 'msaOrgUnits'
+$MSAOUs = (Get-AzDataTableEntity @MSATable | Select-Object 'OU','Tenant','TenantId','UPNSuffix') 
+if ($TenantFilter -ne 'AllTenants') { $MSAOUs = $MSAOUs | Where-Object {$_.Tenant -eq $TenantFilter} }
+
+
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } 
-#$GraphRequest = $GraphRequest | Where-Object { ( ($_.primDomain) -in $MSAOUs.UPNSuffix ) } 
-#$GraphRequest = $GraphRequest | 
-#Where-Object { 
-#    $OU = $_.onPremisesDistinguishedName -replace '^.+?(?<!\\),',''
-#    $indx = $OU.Split(',').IndexOf('OU=Users')
-#    $OU.Replace( "$([string]$OU.Split(',')[$indx-1]),",'') -in $MSAOUs.OU
-#}
+$GraphRequest = $GraphRequest | Where-Object { ( ($_.userPrincipalName -split '@' | Select-Object -Last 1) -in ($MSAOUs.UPNSuffix).UPNSuffix ) } 
 
 $GraphRequest = $GraphRequest | 
 Where-Object { 
