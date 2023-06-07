@@ -83,7 +83,7 @@ $MSATable = Get-CIPPTable -TableName 'msaOrgUnits'
 $MSAOUs = (Get-AzDataTableEntity @MSATable | Select-Object 'OU','Tenant','TenantId','UPNSuffix') 
 if ($TenantFilter -ne 'AllTenants') { $MSAOUs = $MSAOUs | Where-Object {$_.Tenant -eq $TenantFilter} }
 
-$MSAExcludedTable = Get-CIPPTable -TableName 'msaOrgUnits'
+$MSAExcludedTable = Get-CIPPTable -TableName 'msaExcludedUsers'
 $MSAExclusions = (Get-AzDataTableEntity @MSAExcludedTable | Select-Object 'mail','displayName') 
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
