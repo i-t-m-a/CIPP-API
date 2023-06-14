@@ -29,6 +29,25 @@ $GraphRequest = if ($TenantFilter -ne 'AllTenants') {
 else {
     $Table = Get-CIPPTable -TableName 'cacheusers'
     $Rows = Get-AzDataTableEntity @Table | Where-Object -Property Timestamp -GT (Get-Date).AddHours(-1)
+    $Rows = $Rows | 
+    Where-Object { 
+    
+        foreach ($o in $MSAOUs.OU)
+        {
+            $ouToMatch = $o.Split(',')[0]
+            $OU = $_.onPremisesDistinguishedName -replace '^.+?(?<!\\),',''
+            $indx = $OU.Split(',').IndexOf($ouToMatch)
+            if ($indx -gt 0)
+            {
+                $OU.Replace( "$([string]$OU.Split(',')[$indx-1]),",'') -in $MSAOUs.OU
+            }
+            elseif ($OU -like "*$o*")
+            {
+                $true
+            }
+        }
+    }
+
     if (!$Rows) {
         $Queue = New-CippQueueEntry -Name 'Users' -Link '/identity/administration/users?customerId=AllTenants'
         Push-OutputBinding -Name Msg -Value "users/$($userid)?`$top=999&`$select=$($selectlist -join ',')&`$filter=$GraphFilter&`$count=true"
