@@ -38,24 +38,6 @@ $GraphRequest = if ($TenantFilter -ne 'AllTenants') {
 else {
     $Table = Get-CIPPTable -TableName 'cacheusers'
     $Rows = Get-AzDataTableEntity @Table | Where-Object -Property Timestamp -GT (Get-Date).AddHours(-1)
-    $Rows = $Rows.Data | ConvertFrom-Json | Select-Object $selectlist | 
-    Where-Object { 
-    
-        foreach ($o in $MSAOUs.OU)
-        {
-            $ouToMatch = $o.Split(',')[0]
-            $OU = $_.onPremisesDistinguishedName -replace '^.+?(?<!\\),',''
-            $indx = $OU.Split(',').IndexOf($ouToMatch)
-            if ($indx -gt 0)
-            {
-                $OU.Replace( "$([string]$OU.Split(',')[$indx-1]),",'') -in $MSAOUs.OU
-            }
-            elseif ($OU -like "*$o*")
-            {
-                $true
-            }
-        }
-    }
 
     if (!$Rows) {
         $Queue = New-CippQueueEntry -Name 'Users' -Link '/identity/administration/users?customerId=AllTenants'
@@ -66,7 +48,27 @@ else {
         }
     }         
     else {
-        $Rows.Data | ConvertFrom-Json | Select-Object $selectlist | ForEach-Object {
+
+        $Rows = $Rows.Data | ConvertFrom-Json | Select-Object $selectlist | 
+        Where-Object { 
+        
+            foreach ($o in $MSAOUs.OU)
+            {
+                $ouToMatch = $o.Split(',')[0]
+                $OU = $_.onPremisesDistinguishedName -replace '^.+?(?<!\\),',''
+                $indx = $OU.Split(',').IndexOf($ouToMatch)
+                if ($indx -gt 0)
+                {
+                    $OU.Replace( "$([string]$OU.Split(',')[$indx-1]),",'') -in $MSAOUs.OU
+                }
+                elseif ($OU -like "*$o*")
+                {
+                    $true
+                }
+            }
+        }
+
+        $Rows | ForEach-Object {
             $_.onPremisesSyncEnabled = [bool]($_.onPremisesSyncEnabled)
             $_.Aliases = $_.Proxyaddresses -join ', '
             $SkuID = $_.AssignedLicenses.skuid
