@@ -29,7 +29,7 @@ $GraphRequest = if ($TenantFilter -ne 'AllTenants') {
 else {
     $Table = Get-CIPPTable -TableName 'cacheusers'
     $Rows = Get-AzDataTableEntity @Table | Where-Object -Property Timestamp -GT (Get-Date).AddHours(-1)
-    $Rows = $Rows.Data | ConvertFrom-Json  | 
+    $Rows = $Rows.Data | ConvertFrom-Json | Select-Object $selectlist | 
     Where-Object { 
     
         foreach ($o in $MSAOUs.OU)
