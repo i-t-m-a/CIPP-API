@@ -16,6 +16,15 @@ $TenantFilter = $Request.Query.TenantFilter
 $GraphFilter = $Request.Query.graphFilter
 $userid = $Request.Query.UserID
 
+# MSA Org Units
+#$MSA = Get-Content msa
+$MSATable = Get-CIPPTable -TableName 'msaOrgUnits'
+$MSAOUs = (Get-AzDataTableEntity @MSATable | Select-Object 'OU','Tenant','TenantId','UPNSuffix') 
+if ($TenantFilter -ne 'AllTenants') { $MSAOUs = $MSAOUs | Where-Object {$_.Tenant -eq $TenantFilter} }
+
+$MSAExcludedTable = Get-CIPPTable -TableName 'msaExcludedUsers'
+$MSAExclusions = (Get-AzDataTableEntity @MSAExcludedTable | Select-Object 'mail','displayName') 
+
 $GraphRequest = if ($TenantFilter -ne 'AllTenants') {
     New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users/$($userid)?`$top=999&`$select=$($selectlist -join ',')&`$filter=$GraphFilter&`$count=true" -tenantid $TenantFilter -ComplexFilter | Select-Object $selectlist | ForEach-Object {
         $_.onPremisesSyncEnabled = [bool]($_.onPremisesSyncEnabled)
@@ -67,15 +76,6 @@ else {
         }
     }
 }
-
-# MSA Org Units
-#$MSA = Get-Content msa
-$MSATable = Get-CIPPTable -TableName 'msaOrgUnits'
-$MSAOUs = (Get-AzDataTableEntity @MSATable | Select-Object 'OU','Tenant','TenantId','UPNSuffix') 
-if ($TenantFilter -ne 'AllTenants') { $MSAOUs = $MSAOUs | Where-Object {$_.Tenant -eq $TenantFilter} }
-
-$MSAExcludedTable = Get-CIPPTable -TableName 'msaExcludedUsers'
-$MSAExclusions = (Get-AzDataTableEntity @MSAExcludedTable | Select-Object 'mail','displayName') 
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } 
