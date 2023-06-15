@@ -49,7 +49,7 @@ else {
     }         
     else {
 
-        $Rows = $Rows.Data | ConvertFrom-Json | Select-Object $selectlist | 
+        $Rows.Data | ConvertFrom-Json | Select-Object $selectlist | 
         Where-Object { 
         
             foreach ($o in $MSAOUs.OU)
@@ -67,7 +67,7 @@ else {
                 }
             }
         }
-
+        <#
         $Rows | ForEach-Object {
             $_.onPremisesSyncEnabled = [bool]($_.onPremisesSyncEnabled)
             $_.Aliases = $_.Proxyaddresses -join ', '
@@ -76,6 +76,7 @@ else {
             $_.primDomain = ($_.userPrincipalName -split '@' | Select-Object -Last 1)
             $_
         }
+        #>
     }
 }
 
