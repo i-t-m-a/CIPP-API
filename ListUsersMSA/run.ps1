@@ -49,34 +49,26 @@ else {
     }         
     else {
 
-        $Rows.Data | ConvertFrom-Json | Select-Object $selectlist | 
-        Where-Object { 
-        
-            foreach ($o in $MSAOUs.OU)
-            {
-                $ouToMatch = $o.Split(',')[0]
-                $OU = $_.onPremisesDistinguishedName -replace '^.+?(?<!\\),',''
-                $indx = $OU.Split(',').IndexOf($ouToMatch)
-                if ($indx -gt 0)
-                {
-                    $OU.Replace( "$([string]$OU.Split(',')[$indx-1]),",'') -in $MSAOUs.OU
-                }
-                elseif ($OU -like "*$o*")
-                {
-                    $true
-                }
+        $Table = Get-CIPPTable -TableName 'cacheusers'
+        $Rows = Get-AzDataTableEntity @Table | Where-Object -Property Timestamp -GT (Get-Date).AddHours(-1)
+        if (!$Rows) {
+            $Queue = New-CippQueueEntry -Name 'Users' -Link '/identity/administration/users?customerId=AllTenants'
+            Push-OutputBinding -Name Msg -Value "users/$($userid)?`$top=999&`$select=$($selectlist -join ',')&`$filter=$GraphFilter&`$count=true"
+            [PSCustomObject]@{
+                Tenant  = 'Loading data for all tenants. Please check back after the job completes'
+                QueueId = $Queue.RowKey
+            }
+        }         
+        else {
+            $Rows.Data | ConvertFrom-Json | Select-Object $selectlist | ForEach-Object {
+                $_.onPremisesSyncEnabled = [bool]($_.onPremisesSyncEnabled)
+                $_.Aliases = $_.Proxyaddresses -join ', '
+                $SkuID = $_.AssignedLicenses.skuid
+                $_.LicJoined = ($ConvertTable | Where-Object { $_.guid -in $skuid }).'Product_Display_Name' -join ', '
+                $_.primDomain = ($_.userPrincipalName -split '@' | Select-Object -Last 1)
+                $_
             }
         }
-        <#
-        $Rows | ForEach-Object {
-            $_.onPremisesSyncEnabled = [bool]($_.onPremisesSyncEnabled)
-            $_.Aliases = $_.Proxyaddresses -join ', '
-            $SkuID = $_.AssignedLicenses.skuid
-            $_.LicJoined = ($ConvertTable | Where-Object { $_.guid -in $skuid }).'Product_Display_Name' -join ', '
-            $_.primDomain = ($_.userPrincipalName -split '@' | Select-Object -Last 1)
-            $_
-        }
-        #>
     }
 }
 
