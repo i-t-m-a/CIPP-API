@@ -7,6 +7,5 @@ chocoapps.cache
 Cache_*
 Logs
 ExcludedTenants
-Config
 SendNotifications/config.json
 msa
