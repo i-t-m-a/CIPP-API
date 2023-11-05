@@ -544,7 +544,7 @@ function Get-Tenants {
                 }) | Out-Null
         }
         foreach ($Tenant in $TenantList) {
-            if ($Tenant.defaultDomainName -eq 'Invalid') { continue }
+            if ($Tenant.defaultDomainName -eq 'Invalid' -or !$Tenant.defaultDomainName) { continue }
             $IncludedTenantsCache.Add(@{
                     RowKey                   = [string]$Tenant.customerId
                     PartitionKey             = 'Tenants'
@@ -567,7 +567,7 @@ function Get-Tenants {
             Add-CIPPAzDataTableEntity @TenantsTable -Entity $IncludedTenantsCache
         }
     }
-    return ($IncludedTenantsCache | Sort-Object -Property displayName)
+    return ($IncludedTenantsCache | Where-Object -Property defaultDomainName -ne $null | Sort-Object -Property displayName)
 
 }
 
