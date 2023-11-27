@@ -25,6 +25,9 @@ if ($TenantFilter -ne 'AllTenants') { $MSAOUs = $MSAOUs | Where-Object {$_.Tenan
 $MSAExcludedTable = Get-CIPPTable -TableName 'msaExcludedUsers'
 $MSAExclusions = (Get-AzDataTableEntity @MSAExcludedTable | Select-Object 'mail','displayName') 
 
+$MSAIncludedTable = Get-CIPPTable -TableName 'msaIncludedUsers'
+$MSAIncludsions = (Get-AzDataTableEntity @MSAIncludedTable | Select-Object 'mail') 
+
 $GraphRequest = if ($TenantFilter -ne 'AllTenants') {
     New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users/$($userid)?`$top=999&`$select=$($selectlist -join ',')&`$filter=$GraphFilter&`$count=true" -tenantid $TenantFilter -ComplexFilter | Select-Object $selectlist | ForEach-Object {
         $_.onPremisesSyncEnabled = [bool]($_.onPremisesSyncEnabled)
@@ -73,9 +76,12 @@ else {
 }
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
+$GraphRequest = $AllUsers
 $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } 
 $GraphRequest = $GraphRequest | Where-Object { ( $_.mail -notin ($MSAExclusions.mail) ) }  
 $GraphRequest = $GraphRequest | Where-Object { ( $_.userPrincipalName -notlike "*#EXT#*" ) } 
+$AllUsers = $AllUsers | Where-Object { ( $_.mail in ($MSAIncludsions.mail) ) }  
+$GraphRequest = $GraphRequest + $AllUsers
 
 $GraphRequest = $GraphRequest | 
 Where-Object { 
