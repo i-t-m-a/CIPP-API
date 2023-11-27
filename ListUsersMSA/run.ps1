@@ -76,7 +76,7 @@ else {
 }
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
-$GraphRequest = $AllUsers
+$AllUsers = $GraphRequest
 $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } 
 $GraphRequest = $GraphRequest | Where-Object { ( $_.mail -notin ($MSAExclusions.mail) ) }  
 $GraphRequest = $GraphRequest | Where-Object { ( $_.userPrincipalName -notlike "*#EXT#*" ) } 
