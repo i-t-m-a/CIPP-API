@@ -80,7 +80,7 @@ $AllUsers = $GraphRequest
 $GraphRequest = $GraphRequest | Where-Object { ($_.accountEnabled -eq $true) } 
 $GraphRequest = $GraphRequest | Where-Object { ( $_.mail -notin ($MSAExclusions.mail) ) }  
 $GraphRequest = $GraphRequest | Where-Object { ( $_.userPrincipalName -notlike "*#EXT#*" ) } 
-$AllUsers = $AllUsers | Where-Object { ( $_.mail in ($MSAIncludsions.mail) ) }  
+$AllUsers = $AllUsers | Where-Object { ( $_.mail -in ($MSAIncludsions.mail) ) }  
 $GraphRequest = $GraphRequest + $AllUsers
 
 $GraphRequest = $GraphRequest | 
