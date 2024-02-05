@@ -1,0 +1,23 @@
+{
+  "name": "Test Report",
+  "style": "Table",
+  "Fields": [
+    {
+      "name": "LicenseSettings",
+      "UseExistingInfo": false,
+      "FrontendFields": [
+        {
+          "name": "License Type",
+          "value": "LicenseSettings.skuPartNumber",
+          "formatter": "string"
+        }
+      ],
+      "StoreAs": "JSON",
+      "API": "Graph",
+      "ExtractFields": [
+        "skuPartNumber"
+      ],
+      "URL": "https://graph.microsoft.com/v1.0/me/licenseDetails"
+    }
+  ]
+}
